@@ -68,17 +68,17 @@ struct Split string_split(string s, string d, bool one_match) {
     string* results = (string*)malloc(0);
     int results_length = 0;
 
-    for (int i = offset; i < strlen(s); i++) {
+    for (int i = offset; i < (int)strlen(s); i++) {
         bool match = true;
-        for (int j = 0; j < strlen(d); j++)
+        for (int j = 0; j < (int)strlen(d); j++)
             if (d[j] != s[i-(offset-j)]) {
                 match = false;
                 break;
             }
 
-        if (match == true || i == strlen(s) - 1) {
+        if (match == true || i == (int)strlen(s) - 1) {
 
-            if (i == strlen(s) - 1) offset = -1;
+            if (i == (int)strlen(s) - 1) offset = -1;
 
             string element = malloc(i-offset-last_index);
             strncpy(element, s+last_index, i-last_index-offset);
@@ -91,8 +91,8 @@ struct Split string_split(string s, string d, bool one_match) {
 
             if (one_match == true) {
                 string rest_s = malloc(strlen(s) - i);
-                strncpy(rest_s, s+i+1, strlen(s) - i);
-                rest_s[strlen(s) - i] = '\0';
+                strncpy(rest_s, s+i+1, ((int)strlen(s)) - i);
+                rest_s[((int)strlen(s)) - i] = '\0';
 
                 results = realloc(results, (sizeof(string) * (results_length + 1)));
                 results[results_length] = rest_s;
@@ -124,25 +124,25 @@ struct Match match_split(string s, string d) {
     return m;
 }
 
-struct MacroPattern macro_compile(string pattern) {
+struct MacroPattern macro_compile(const string pattern) {
     bool escape = false;
     int last_index = 0;
     struct Arg* data = malloc(0);
     int length = 0;
 
-    for (int i = 0; i < strlen(pattern); i++) {
+    for (int i = 0; i < (int)strlen(pattern); i++) {
         char c = pattern[i];
         if (c == '\\') escape = true;
         else if (c == '<' && escape == false) {
             int j = i;
-            for (; j < strlen(pattern) && pattern[j] != '>'; j++);
+            for (; j < ((int)strlen(pattern)) && pattern[j] != '>'; j++);
 
             string name = string_slice(pattern, i+1, j);
             string before = string_slice(pattern, last_index, i);
             string after_ctx = string_slice(pattern, j, (int)strlen(pattern));
             bool after = true;
 
-            if (j == strlen(pattern) - 1) after = false;
+            if (j == ((int)strlen(pattern)) - 1) after = false;
             data = realloc(data, sizeof(struct Arg) * (length + 1));
             struct Arg new_arg = {name, before, after, after_ctx};
             data[length] = new_arg;
@@ -156,15 +156,15 @@ struct MacroPattern macro_compile(string pattern) {
 
 
 int macro_parse(const struct MacroPattern compiled_pattern, const string real_const, struct MacroContainer *container) {
-    string real = malloc(sizeof(char) * strlen(real_const));
+    string real = malloc(sizeof(char) * (int)strlen(real_const));
     strcpy(real, real_const);
-    real[strlen(real_const)] = '\0';
+    real[(int)strlen(real_const)] = '\0';
 
     for (int i = 0; compiled_pattern.length; i++) {
         struct Arg arg = compiled_pattern.data[i];
         struct Match m = match_split(real, arg.before);
 
-        if (strlen(m.s1) == 0 && strlen(m.s2) == 0) return 0;
+        if ((int)strlen(m.s1) == 0 && strlen(m.s2) == 0) return 0;
 
         if (i == 0) {}
         else {
@@ -172,9 +172,9 @@ int macro_parse(const struct MacroPattern compiled_pattern, const string real_co
             macro_container_push(container, last_arg.name, m.s1);
         }
 
-        real = realloc(real, sizeof(char) * strlen(m.s2));
+        real = realloc(real, sizeof(char) * (int)strlen(m.s2));
         strcpy(real, m.s2);
-        real[strlen(m.s2)] = '\0';
+        real[(int)strlen(m.s2)] = '\0';
 
         if (i == compiled_pattern.length - 1) {
             char* value;

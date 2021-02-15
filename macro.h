@@ -8,7 +8,7 @@ struct MacroContainer;
 
 struct MacroContainer macro_container();
 
-struct MacroPattern macro_compile(string pattern);
+struct MacroPattern macro_compile(const string pattern);
 
 int macro_parse(struct MacroPattern compiled_pattern, const string real_const, struct MacroContainer *container);
 
