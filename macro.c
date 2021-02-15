@@ -191,19 +191,26 @@ int macro_parse(const struct MacroPattern compiled_pattern, const string real_co
     return 1;
 }
 
-void macro_container_to_json(struct MacroContainer container, string result) {
+void macro_container_to_json(struct MacroContainer container, string* result) {
     int length = 2;
+
     for (int i = 0; i < container.length; i++) {
         length += (int)strlen(container.values[i]) + (int)strlen(container.keys[i]) + 5;
     }
+
     char json[length];
     strcpy(json, "{");
 
     for (int i = 0; i < container.length; i++) {
-        snprintf(json, sizeof(json), "\"%s\":\"%s\"", container.keys[i], container.values[i]);
-        if (i != container.length - 1) strcpy(json, ",");
+        strcat(json, "\"");
+        strcat(json, container.keys[i]);
+        strcat(json, "\":\"");
+        strcat(json, container.values[i]);
+        strcat(json, "\"");
+        if (i != container.length - 1)
+            strcat(json, ",");
     }
 
-    strcpy(json, "}");
-    strcpy(result, json);
+    strcat(json, "}");
+    if (result != NULL) strcpy(*result, json);
 }
