@@ -17,6 +17,7 @@ struct Arg {
 };
 
 struct MacroPattern {
+    const string pattern;
     struct Arg* data;
     int length;
 };
@@ -150,7 +151,7 @@ struct MacroPattern macro_compile(const string pattern) {
         }
     }
 
-    struct MacroPattern args = {data, length};
+    struct MacroPattern args = {pattern, data, length};
     return args;
 }
 
@@ -159,6 +160,12 @@ int macro_parse(const struct MacroPattern compiled_pattern, const string real_co
     string real = malloc(sizeof(char) * (int)strlen(real_const));
     strcpy(real, real_const);
     real[(int)strlen(real_const)] = '\0';
+
+    if (compiled_pattern.length == 0) {
+        int result = 0;
+        if (strcmp(real, compiled_pattern.pattern) == 0) result = 1;
+        return result;
+    }
 
     for (int i = 0; compiled_pattern.length; i++) {
         struct Arg arg = compiled_pattern.data[i];
