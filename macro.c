@@ -61,40 +61,53 @@ void macro_container_push(struct MacroContainer *container, string key, string v
     container->length++;
 }
 
+
+// Cmacro string split algorithm
 struct Split string_split(string s, string d, bool one_match) {
 
+    // Starting offset based on delimiter length
     int offset = (int)strlen(d) - 1;
+    // Index of last arg to form iter index
     int last_index = 0;
 
+    // Future values
     string* results = (string*)malloc(0);
     int results_length = 0;
 
+    // Iter real string
     for (int i = offset; i < (int)strlen(s); i++) {
         bool match = true;
+
+        // Checking {offset} amount chars of string if they form a delimiter
+        // If they dont match is assigned to false
         for (int j = 0; j < (int)strlen(d); j++)
             if (d[j] != s[i-(offset-j)]) {
                 match = false;
                 break;
             }
 
+        // Delimiter was found or this is the end of the string
         if (match == true || i == (int)strlen(s) - 1) {
-
             if (i == (int)strlen(s) - 1) offset = -1;
 
+            // Slicing string to get element
             string element = malloc(i-offset-last_index);
             strncpy(element, s+last_index, i-last_index-offset);
             element[i-last_index-offset] = '\0';
 
+            // Adding element to values
             results = realloc(results, (sizeof(string) * (results_length + 1)));
             results[results_length] = element;
-
             results_length++;
 
+            // If only one match is requested
             if (one_match == true) {
+                // Getting the rest of string consuming this is the last element
                 string rest_s = malloc(strlen(s) - i);
                 strncpy(rest_s, s+i+1, ((int)strlen(s)) - i);
                 rest_s[((int)strlen(s)) - i] = '\0';
 
+                // Adding element to values
                 results = realloc(results, (sizeof(string) * (results_length + 1)));
                 results[results_length] = rest_s;
                 results_length++;
@@ -113,11 +126,18 @@ struct Split string_split(string s, string d, bool one_match) {
     return r;
 }
 
+// Shortcut to get basic split for strings in
+// parsing algorithm.
 struct Match match_split(string s, string d) {
+    // Splitting string with one match
+    // (always getting two elements)
     struct Split spl = string_split(s, d, true);
 
     struct Match m = {"", ""};
 
+    // Cases:
+    // 0 elements / anything else - returning match with empty strings
+    // 2 elements - returning complete match
     if (spl.length == 2) {
         m.s1 = spl.results[0];
         m.s2 = spl.results[1];
@@ -125,6 +145,7 @@ struct Match match_split(string s, string d) {
     return m;
 }
 
+// Macro pattern compiler
 struct MacroPattern macro_compile(const string pattern) {
     bool escape = false;
     int last_index = 0;
@@ -165,11 +186,12 @@ int macro_parse(const struct MacroPattern compiled_pattern, const string real_co
         int result = 0;
         if (strcmp(real, compiled_pattern.pattern) == 0) result = 1;
         return result;
-    }
+    } else if (strlen(real) == 0) return 0;
 
     for (int i = 0; compiled_pattern.length; i++) {
         struct Arg arg = compiled_pattern.data[i];
         struct Match m = match_split(real, arg.before);
+        printf("@%s @%s\n", m.s1, m.s2);
 
         if ((int)strlen(m.s1) == 0 && strlen(m.s2) == 0) return 0;
 
@@ -184,6 +206,7 @@ int macro_parse(const struct MacroPattern compiled_pattern, const string real_co
         real[(int)strlen(m.s2)] = '\0';
 
         if (i == compiled_pattern.length - 1) {
+            if (i == 0 && strlen(m.s2) == 0) return 0;
             char* value;
             if (arg.after == false) {
                 value = m.s2;
