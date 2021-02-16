@@ -1,1 +1,1 @@
-from .api import match
+from .api import match, Pattern
