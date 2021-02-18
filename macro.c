@@ -9,11 +9,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+enum ArgType {
+    ORDINARY,
+    IGNORE,
+    ANYTHING,
+};
+
 struct Arg {
     string name;
     string before;
     bool after;
     string after_ctx;
+    enum ArgType type;
 };
 
 struct MacroPattern {
@@ -147,26 +154,57 @@ struct Match match_split(string s, string d) {
 
 // Macro pattern compiler
 struct MacroPattern macro_compile(const string pattern) {
+    // Symbol can be escaped with \ symbol
     bool escape = false;
-    int last_index = 0;
+    
+    // Args which might be stored in pattern later
     struct Arg* data = malloc(0);
     int length = 0;
+    int last_index = 0;
 
     for (int i = 0; i < (int)strlen(pattern); i++) {
         char c = pattern[i];
-        if (c == '\\') escape = true;
-        else if (c == '<' && escape == false) {
+
+        // Needed to escape symbols like '<'
+        if (escape == true) escape = false;
+        else if (c == '\\') escape = true;
+
+        else if (c == '<') {
+            // If symbol is brace, ending brace will be
+            // found and its index moved to j
             int j = i;
             for (; j < ((int)strlen(pattern)) && pattern[j] != '>'; j++);
 
+            // Getting argument info
             string name = string_slice(pattern, i+1, j);
             string before = string_slice(pattern, last_index, i);
             string after_ctx = string_slice(pattern, j, (int)strlen(pattern));
             bool after = true;
 
+            enum ArgType type = ORDINARY;
+
+            // Resolving argument type
+            if (strcmp(name, "!") == 0) {
+                // IGNORE ARGUMENT
+                // Its data will be completely
+                // ignored
+                type = IGNORE;
+            }
+            else if (strcmp(name, "1") == 0) {
+                // ANYTHING ARGUMENT
+                // Its data is ignored though
+                // its existence is required
+                type = ANYTHING;
+            }
+            // TODO: Union(*), Char(^), Recursion(&), Validated(*:validator[args])
+
+            // Check if argument marks end of the string
+            // then use it to complete matching
             if (j == ((int)strlen(pattern)) - 1) after = false;
+
+            // Add argument to data
             data = realloc(data, sizeof(struct Arg) * (length + 1));
-            struct Arg new_arg = {name, before, after, after_ctx};
+            struct Arg new_arg = {name, before, after, after_ctx, type};
             data[length] = new_arg;
             length++;
 
@@ -180,10 +218,23 @@ struct MacroPattern macro_compile(const string pattern) {
 }
 
 
+int parse_argument(struct MacroContainer* container, const struct Arg argument, string value) {
+    switch (argument.type) {
+        case ORDINARY:
+            macro_container_push(container, argument.name, value);
+            break;
+        case ANYTHING:
+            if (strlen(value) == 0) return 0;
+        default:
+            break;
+    }
+    return 1;
+}
+
+
 int macro_parse(const struct MacroPattern compiled_pattern, const string real_const, struct MacroContainer *container) {
-    string real = malloc(sizeof(char) * (int)strlen(real_const));
+    string real = malloc((strlen(real_const) + 1) * sizeof(char));
     strcpy(real, real_const);
-    real[(int)strlen(real_const)] = '\0';
 
     if (compiled_pattern.length == 0) {
         int result = 0;
@@ -200,7 +251,7 @@ int macro_parse(const struct MacroPattern compiled_pattern, const string real_co
         if (i == 0) {}
         else {
             struct Arg last_arg = compiled_pattern.data[i-1];
-            macro_container_push(container, last_arg.name, m.s1);
+            if (parse_argument(container, last_arg, m.s1) == 0) return 0;
         }
 
         real = realloc(real, sizeof(char) * (int)strlen(m.s2));
@@ -215,7 +266,7 @@ int macro_parse(const struct MacroPattern compiled_pattern, const string real_co
             } else {
                 value = string_slice(real, 0, (int)(strlen(real) - strlen(arg.after_ctx) + 1));
             }
-            macro_container_push(container, arg.name, value);
+            if (parse_argument(container, arg, value) == 0) return 0;
             break;
         }
     }
