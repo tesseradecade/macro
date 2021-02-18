@@ -169,6 +169,9 @@ struct MacroPattern macro_compile(const string pattern) {
             struct Arg new_arg = {name, before, after, after_ctx};
             data[length] = new_arg;
             length++;
+
+            // Set last_index to the end of the arg declaration
+            last_index = j + 1;
         }
     }
 
@@ -191,7 +194,6 @@ int macro_parse(const struct MacroPattern compiled_pattern, const string real_co
     for (int i = 0; compiled_pattern.length; i++) {
         struct Arg arg = compiled_pattern.data[i];
         struct Match m = match_split(real, arg.before);
-        printf("@%s @%s\n", m.s1, m.s2);
 
         if ((int)strlen(m.s1) == 0 && strlen(m.s2) == 0) return 0;
 
