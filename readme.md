@@ -19,3 +19,16 @@ int main() {
     // STDOUT: {"name":"macro","action":"parse"}
 }
 ```
+
+## Bindings
+
+Currently available: [Python binding](/bindings/python)  
+Planned: Prolog, Rust bindings
+
+## Benchmarks
+
+Due to active projects development benchmarks can change each commit, you can build them yourself with [benchmarks builder](benchmarks/benchmarks_builder.py)
+
+## How to help
+
+Contributions are welcome! If you want to help the head maintainer, you may be interested to sponsor [timoniq](https://github.com/timoniq), use "Sponsor" button
