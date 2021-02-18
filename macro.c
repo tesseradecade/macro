@@ -47,7 +47,7 @@ struct MacroContainer {
 
 
 string string_slice(const string s, int from, int to) {
-    string substring = malloc(to-from);
+    string substring = malloc((to-from+1) * sizeof(char));
     strncpy(substring, s+from, to-from);
     substring[to-from] = '\0';
     return substring;
@@ -98,7 +98,7 @@ struct Split string_split(string s, string d, bool one_match) {
             if (i == (int)strlen(s) - 1) offset = -1;
 
             // Slicing string to get element
-            string element = malloc(i-offset-last_index);
+            string element = malloc((i-offset-last_index+1)*sizeof(char));
             strncpy(element, s+last_index, i-last_index-offset);
             element[i-last_index-offset] = '\0';
 
@@ -110,7 +110,7 @@ struct Split string_split(string s, string d, bool one_match) {
             // If only one match is requested
             if (one_match == true) {
                 // Getting the rest of string consuming this is the last element
-                string rest_s = malloc(strlen(s) - i);
+                string rest_s = malloc((strlen(s) - i)*sizeof(char));
                 strncpy(rest_s, s+i+1, ((int)strlen(s)) - i);
                 rest_s[((int)strlen(s)) - i] = '\0';
 
@@ -181,6 +181,10 @@ struct MacroPattern macro_compile(const string pattern) {
             string after_ctx = string_slice(pattern, j, (int)strlen(pattern));
             bool after = true;
 
+            // Check if argument marks end of the string
+            // then use it to complete matching
+            if (j == ((int)strlen(pattern)) - 1) after = false;
+
             enum ArgType type = ORDINARY;
 
             // Resolving argument type
@@ -197,10 +201,6 @@ struct MacroPattern macro_compile(const string pattern) {
                 type = ANYTHING;
             }
             // TODO: Union(*), Char(^), Recursion(&), Validated(*:validator[args])
-
-            // Check if argument marks end of the string
-            // then use it to complete matching
-            if (j == ((int)strlen(pattern)) - 1) after = false;
 
             // Add argument to data
             data = realloc(data, sizeof(struct Arg) * (length + 1));
@@ -254,9 +254,8 @@ int macro_parse(const struct MacroPattern compiled_pattern, const string real_co
             if (parse_argument(container, last_arg, m.s1) == 0) return 0;
         }
 
-        real = realloc(real, sizeof(char) * (int)strlen(m.s2));
+        real = realloc(real, sizeof(char) * ((int)strlen(m.s2) + 1));
         strcpy(real, m.s2);
-        real[(int)strlen(m.s2)] = '\0';
 
         if (i == compiled_pattern.length - 1) {
             if (i == 0 && strlen(m.s2) == 0) return 0;
