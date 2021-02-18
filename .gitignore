@@ -3,3 +3,5 @@ cmake-build-debug
 venv
 build
 *.pyc
+*.out
+.*.c

@@ -34,7 +34,7 @@ jobs:
           python setup.py install
           python -m pip install --upgrade pytest
           cd ../../
-      
+
       - name: Run tests
         run: |
           pytest
