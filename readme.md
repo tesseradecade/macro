@@ -20,6 +20,8 @@ int main() {
 }
 ```
 
+[Documentation](/docs/index.md)
+
 ## Bindings
 
 Currently available: [Python binding](/bindings/python)  
