@@ -38,3 +38,7 @@ jobs:
       - name: Run tests
         run: |
           pytest
+
+      - name: Run benchmarks
+        run: |
+          python benchmarks/benchmarks_builder.py

@@ -16,7 +16,5 @@ def test_match():
 
 
 def test_pattern():
-    assert Pattern("a <b>").length == 1
-    assert Pattern("a <b> <c>").length == 2
     assert Pattern("a <b>").check("") is None
     assert Pattern("hello <name> lets <action>").check("hello @ lets code") == {"name": "@", "action": "code"}

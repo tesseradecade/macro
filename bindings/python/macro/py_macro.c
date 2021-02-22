@@ -1,6 +1,34 @@
 #include <Python.h>
 #include "../../../macro.c"
 
+/* Pattern Type
+*/
+
+typedef struct {
+    PyObject_HEAD
+    struct MacroPattern* inner;
+} PyMP;
+
+static PyTypeObject PyMPType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+            .tp_name = "MacroPattern",
+    .tp_doc = "MacroPattern",
+    .tp_basicsize = sizeof(PyMP),
+    .tp_itemsize = 0,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_new = PyType_GenericNew,
+};
+
+PyMP* make_py_macro_pattern(struct MacroPattern macro_pattern) {
+    PyMP *obj = PyObject_New(PyMP, &PyMPType);
+    obj->inner = (malloc(sizeof(struct MacroPattern)));
+    obj->inner->pattern = strdup(macro_pattern.pattern);
+    obj->inner->data = macro_pattern.data;
+    obj->inner->length = macro_pattern.length;
+    return obj;
+}
+
+
 static PyObject* cmacro_match(PyObject *Py_UNUSED(self), PyObject *args) {
     const char* s_pattern;
     const char* s_real;
@@ -34,55 +62,27 @@ static PyObject* cmacro_match(PyObject *Py_UNUSED(self), PyObject *args) {
 
 static PyObject* cmacro_pattern(PyObject *Py_UNUSED(self), PyObject *args) {
     const char* pattern;
-    if (!PyArg_ParseTuple(args, "s", &pattern))
+    if (!PyArg_ParseTuple(args, "s", &pattern)) {
+        PyErr_SetString(PyExc_TypeError, "(pattern: str) must be passed");
         return NULL;
+    }
     struct MacroPattern compiled_pattern = macro_compile(pattern);
-    PyObject* t_args = PyTuple_New(compiled_pattern.length);
-    for (int i = 0; i < compiled_pattern.length; i++)
-        PyTuple_SET_ITEM(t_args, i, Py_BuildValue(
-                "(ssis)",
-                compiled_pattern.data[i].name,
-                compiled_pattern.data[i].before,
-                compiled_pattern.data[i].after,
-                compiled_pattern.data[i].after_ctx
-                ));
-
-    PyObject* t_pattern = PyTuple_New(3);
-    PyTuple_SET_ITEM(t_pattern, 0, Py_BuildValue("s", compiled_pattern.pattern));
-    PyTuple_SET_ITEM(t_pattern, 1, t_args);
-    PyTuple_SET_ITEM(t_pattern, 2, Py_BuildValue("i", compiled_pattern.length));
-    return t_pattern;
+    PyMP* t_pattern = make_py_macro_pattern(compiled_pattern);
+    return (PyObject*)t_pattern;
 }
 
 static PyObject* cmacro_parse(PyObject *Py_UNUSED(self), PyObject *args) {
     const char *real;
-    const char *s_pattern;
-    PyObject *t_args;
-    int length;
+    PyMP *py_mp;
     int to_json;
 
-    if (!PyArg_ParseTuple(args, "ssOip", &real, &s_pattern, &t_args, &length, &to_json))
+    if (!PyArg_ParseTuple(args, "sO!p", &real, &PyMPType, &py_mp, &to_json))
         return NULL;
 
-    PyObject *iter_args = PyObject_GetIter(t_args);
-    struct Arg *p_args = malloc(sizeof(struct Arg) * (length));
-
-    int i = 0;
-    while (1) {
-        PyObject *next = PyIter_Next(iter_args);
-        struct Arg arg = {NULL, NULL, 1, NULL};
-        if (!next) break;
-        if (!PyArg_ParseTuple(next, "ssis", &arg.name, &arg.before, &arg.after, &arg.after_ctx)) {
-            return NULL;
-        }
-        p_args[i] = arg;
-        i++;
-    }
-
-    struct MacroPattern pattern = {s_pattern, p_args, length};
+    struct MacroPattern* pattern = (struct MacroPattern*)py_mp->inner;
     struct MacroContainer container = macro_container();
 
-    int result = macro_parse(pattern, real, &container);
+    int result = macro_parse(*pattern, real, &container);
     if (result == 0) return Py_BuildValue("s", NULL);
 
     if (to_json == 1) {
@@ -122,5 +122,21 @@ static struct PyModuleDef cmacro =
 
 PyMODINIT_FUNC PyInit_cmacro(void)
 {
-    return PyModule_Create(&cmacro);
+    PyObject *m;
+
+    if (PyType_Ready(&PyMPType) < 0)
+        return NULL;
+
+    m = PyModule_Create(&cmacro);
+    if (m == NULL)
+        return NULL;
+
+    Py_INCREF(&PyMPType);
+    if (PyModule_AddObject(m, "MacroPattern", (PyObject *) &PyMPType) < 0) {
+        Py_DECREF(&PyMPType);
+        Py_DECREF(m);
+        return NULL;
+    }
+
+    return m;
 }

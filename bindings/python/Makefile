@@ -15,6 +15,16 @@ install:
 	@python setup.py install
 	@echo;
 
+uninstall:
+	@echo;
+	@echo "Uninstalling macro";
+	@echo "=================";
+	@sh uninstall.sh;
+	@echo;
+
 tests:
+	@echo;
+	@echo "Running tests";
+	@echo "=================";
 	@python -m pip install pytest
 	@pytest ../../
