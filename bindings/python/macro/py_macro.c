@@ -6,7 +6,7 @@
 
 typedef struct {
     PyObject_HEAD
-    struct MacroPattern* inner;
+    MacroPattern* inner;
 } PyMP;
 
 static PyTypeObject PyMPType = {
@@ -19,9 +19,9 @@ static PyTypeObject PyMPType = {
     .tp_new = PyType_GenericNew,
 };
 
-PyMP* make_py_macro_pattern(struct MacroPattern macro_pattern) {
+PyMP* make_py_macro_pattern(MacroPattern macro_pattern) {
     PyMP *obj = PyObject_New(PyMP, &PyMPType);
-    obj->inner = (malloc(sizeof(struct MacroPattern)));
+    obj->inner = (malloc(sizeof(MacroPattern)));
     obj->inner->pattern = strdup(macro_pattern.pattern);
     obj->inner->data = macro_pattern.data;
     obj->inner->length = macro_pattern.length;
@@ -37,8 +37,8 @@ static PyObject* cmacro_match(PyObject *Py_UNUSED(self), PyObject *args) {
     if (!PyArg_ParseTuple(args, "ssp", &s_pattern, &s_real, &to_json))
         return NULL;
 
-    struct MacroContainer container = macro_container();
-    struct MacroPattern c_pattern = macro_compile(s_pattern);
+    MacroContainer container = macro_container();
+    MacroPattern c_pattern = macro_compile(s_pattern);
     int result = macro_parse(c_pattern, s_real, &container);
     if (result == 0) return Py_BuildValue("s", NULL);
 
@@ -66,7 +66,7 @@ static PyObject* cmacro_pattern(PyObject *Py_UNUSED(self), PyObject *args) {
         PyErr_SetString(PyExc_TypeError, "(pattern: str) must be passed");
         return NULL;
     }
-    struct MacroPattern compiled_pattern = macro_compile(pattern);
+    MacroPattern compiled_pattern = macro_compile(pattern);
     PyMP* t_pattern = make_py_macro_pattern(compiled_pattern);
     return (PyObject*)t_pattern;
 }
@@ -79,8 +79,8 @@ static PyObject* cmacro_parse(PyObject *Py_UNUSED(self), PyObject *args) {
     if (!PyArg_ParseTuple(args, "sO!p", &real, &PyMPType, &py_mp, &to_json))
         return NULL;
 
-    struct MacroPattern* pattern = (struct MacroPattern*)py_mp->inner;
-    struct MacroContainer container = macro_container();
+    MacroPattern* pattern = (MacroPattern*)py_mp->inner;
+    MacroContainer container = macro_container();
 
     int result = macro_parse(*pattern, real, &container);
     if (result == 0) return Py_BuildValue("s", NULL);

@@ -7,6 +7,7 @@ enum ArgType {
     ORDINARY,
     IGNORE,
     ANYTHING,
+    CHAR,
 };
 
 struct Arg {
@@ -15,6 +16,7 @@ struct Arg {
     bool after;
     string after_ctx;
     enum ArgType type;
+    string data;
 };
 
 typedef struct {

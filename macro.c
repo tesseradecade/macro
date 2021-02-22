@@ -154,6 +154,7 @@ MacroPattern macro_compile(const string pattern) {
             string before = string_slice(pattern, last_index, i);
             string after_ctx = string_slice(pattern, j, (int)strlen(pattern));
             bool after = true;
+            string d;
 
             // Check if argument marks end of the string
             // then use it to complete matching
@@ -167,18 +168,26 @@ MacroPattern macro_compile(const string pattern) {
                 // Its data will be completely
                 // ignored
                 type = IGNORE;
+                d = "";
             }
             else if (strcmp(name, "1") == 0) {
                 // ANYTHING ARGUMENT
                 // Its data is ignored though
                 // its existence is required
                 type = ANYTHING;
-            }
+                d = "";
+            } else if (name[0] == '^') {
+                string wo_symbol = string_slice(name, 1, strlen(name)-1);
+                struct Match m = match_split(wo_symbol, "=");
+                strcpy(name, m.s1);
+                type = CHAR;
+                d = m.s2;
+            } else d = "";
             // TODO: Union(*), Char(^), Recursion(&), Validated(*:validator[args])
 
             // Add argument to data
             data = realloc(data, sizeof(struct Arg) * (length + 1));
-            struct Arg new_arg = {name, before, after, after_ctx, type};
+            struct Arg new_arg = {name, before, after, after_ctx, type, d};
             data[length] = new_arg;
             length++;
 
@@ -199,6 +208,13 @@ int parse_argument(MacroContainer* container, const struct Arg argument, string 
             break;
         case ANYTHING:
             if (strlen(value) == 0) return 0;
+        case CHAR:
+            if (strlen(value) != 1) return 0;
+            for (int i = 0; i < (int)strlen(argument.data); i++) if (value[0] == argument.data[i]) {
+                macro_container_push(container, argument.name, value);
+                return 1;
+            }
+            return 0;
         default:
             break;
     }

@@ -8,6 +8,9 @@ def test_match():
     assert match("a <b>", "a", as_json=True) is None
     assert match("a <b>!", "") is None
     assert match("a <b>!", "text?") is None
+    assert match("a <^c=+->", "a ++") is None
+    assert match("a <^c=+->", "a ?") is None
+    assert match("a <^c=+->", "a +") == {"c": "+"}
     assert (
         match("a <b>!..<c>", "a oh!..hello!")
         == {"b": "oh", "c": "hello!"}

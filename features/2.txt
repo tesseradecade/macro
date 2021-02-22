@@ -1,0 +1,5 @@
+22.02.2021
+---
+Char syntax char
+---
+<^arg_name=SYMBOLS> - one char from SYMBOLS and argument passes with (arg_name:\"symbol as string\") record

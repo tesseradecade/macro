@@ -23,3 +23,11 @@ hello <!>!
 ```
 
 Argument existence is not required, no data storage. Examples: \[`hello macro!` -> `1`\], \[`hello !` -> `1`\], \[`hello!` -> `0`\]
+
+## Char argument
+
+```text
+hello <^my_char=+-=/>
+```
+
+One char from `+-=/` and argument passes with (my_char:\"symbol as string\") record
