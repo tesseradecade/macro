@@ -9,26 +9,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-enum ArgType {
-    ORDINARY,
-    IGNORE,
-    ANYTHING,
-};
-
-struct Arg {
-    string name;
-    string before;
-    bool after;
-    string after_ctx;
-    enum ArgType type;
-};
-
-struct MacroPattern {
-    const string pattern;
-    struct Arg* data;
-    int length;
-};
-
 struct Match {
     string s1;
     string s2;
@@ -36,12 +16,6 @@ struct Match {
 
 struct Split {
     string* results;
-    int length;
-};
-
-struct MacroContainer {
-    string* keys;
-    string* values;
     int length;
 };
 
@@ -53,14 +27,14 @@ string string_slice(const string s, int from, int to) {
     return substring;
 }
 
-struct MacroContainer macro_container() {
+MacroContainer macro_container() {
     string* keys = (string*)malloc(0);
     string* values = (string*)malloc(0);
-    struct MacroContainer c = {keys, values, 0};
+    MacroContainer c = {keys, values, 0};
     return c;
 }
 
-void macro_container_push(struct MacroContainer *container, string key, string value) {
+void macro_container_push(MacroContainer *container, string key, string value) {
     container->keys = realloc(container->keys, sizeof(string) * (container->length + 1));
     container->values = realloc(container->values, sizeof(string) * (container->length + 1));
     container->keys[container->length] = key;
@@ -153,7 +127,7 @@ struct Match match_split(string s, string d) {
 }
 
 // Macro pattern compiler
-struct MacroPattern macro_compile(const string pattern) {
+MacroPattern macro_compile(const string pattern) {
     // Symbol can be escaped with \ symbol
     bool escape = false;
     
@@ -213,12 +187,12 @@ struct MacroPattern macro_compile(const string pattern) {
         }
     }
 
-    struct MacroPattern args = {pattern, data, length};
+    MacroPattern args = {pattern, data, length};
     return args;
 }
 
 
-int parse_argument(struct MacroContainer* container, const struct Arg argument, string value) {
+int parse_argument(MacroContainer* container, const struct Arg argument, string value) {
     switch (argument.type) {
         case ORDINARY:
             macro_container_push(container, argument.name, value);
@@ -232,7 +206,7 @@ int parse_argument(struct MacroContainer* container, const struct Arg argument, 
 }
 
 
-int macro_parse(const struct MacroPattern compiled_pattern, const string real_const, struct MacroContainer *container) {
+int macro_parse(const MacroPattern compiled_pattern, const string real_const, MacroContainer *container) {
     string real = malloc((strlen(real_const) + 1) * sizeof(char));
     strcpy(real, real_const);
 
@@ -273,7 +247,7 @@ int macro_parse(const struct MacroPattern compiled_pattern, const string real_co
     return 1;
 }
 
-void macro_container_to_json(struct MacroContainer container, string* result) {
+void macro_container_to_json(MacroContainer container, string* result) {
     int length = 2;
 
     for (int i = 0; i < container.length; i++) {

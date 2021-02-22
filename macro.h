@@ -1,17 +1,40 @@
 #ifndef MACRO_MACRO_H
 #define MACRO_MACRO_H
 #define string char*
+#define bool int
 
-struct MacroPattern;
+enum ArgType {
+    ORDINARY,
+    IGNORE,
+    ANYTHING,
+};
 
-struct MacroContainer;
+struct Arg {
+    string name;
+    string before;
+    bool after;
+    string after_ctx;
+    enum ArgType type;
+};
 
-struct MacroContainer macro_container();
+typedef struct {
+    const string pattern;
+    struct Arg* data;
+    int length;
+} MacroPattern;
 
-struct MacroPattern macro_compile(const string pattern);
+typedef struct {
+    string* keys;
+    string* values;
+    int length;
+} MacroContainer;
 
-int macro_parse(struct MacroPattern compiled_pattern, const string real_const, struct MacroContainer *container);
+MacroContainer macro_container();
 
-void macro_container_to_json(struct MacroContainer container, string* result);
+MacroPattern macro_compile(const string pattern);
+
+int macro_parse(MacroPattern compiled_pattern, const string real_const, MacroContainer *container);
+
+void macro_container_to_json(MacroContainer container, string* result);
 
 #endif //MACRO_MACRO_H
