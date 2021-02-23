@@ -300,8 +300,9 @@ void macro_container_to_json(MacroContainer container, string* result) {
 #if OS_IS_UNIX_MACOS
     char json[length];
 #else
-    if (length == 0) return NULL;
-    char json[length] = malloc(sizeof(char) * length);
+    char* json = malloc(sizeof(char) * length);
+    if (json == NULL) return NULL;
+    json = "";
 #endif
 
     strcpy(json, "{");
