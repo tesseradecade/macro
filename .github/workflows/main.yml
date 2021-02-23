@@ -31,7 +31,8 @@ jobs:
       - name: Build macro
         run: |
           cd bindings/python
-          python setup.py install
+          make uninstall
+          make install
           python -m pip install --upgrade pytest
           cd ../../
 

@@ -8,6 +8,14 @@ cd macro/bindings/python
 python setup.py install
 ```
 
+Or use makefile
+
+```shell script
+git clone https://github.com/tesseradecade/macro macro
+cd macro/bindings/python
+make install
+```
+
 ## Usage
 
 Simple `match` compiles `pattern` and completes a match with `real` string, not appropriate for production, use this feature to test smt, also `as_json` is experimental feature turning macro's `MacroContainer` into json data (when `True` returns string)
@@ -32,3 +40,7 @@ pattern.check("hi my password is qwerty123, is it ok?")
 pattern.check("i'm not gonna tell you my password!")
 # None
 ```
+
+## Makefile
+
+To uninstall macro use `make uninstall`, to run tests use `make tests`
