@@ -10,8 +10,12 @@ site_pkg = site.getsitepackages()[0] + os.sep;
 for pkg in os.listdir(site_pkg):
   if re.match(pattern, pkg):
     if os.path.isfile(site_pkg + pkg):
-      os.remove(site_pkg + pkg);
+        os.remove(site_pkg + pkg);
     else:
-      shutil.rmtree(site_pkg + pkg);
+        shutil.rmtree(site_pkg + pkg);
+    print(f'{pkg} deleted;');
+if 'build' in os.listdir():
+    shutil.rmtree('build');
+    print('build deleted;');
 ")
 echo "Uninstalled!"

@@ -9,6 +9,33 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#if     defined(_MSC_VER) ||    \
+        defined(__WIN32) ||     \
+        defined(__WIN32__) ||   \
+        defined(_WIN32) ||      \
+        defined(WIN32) ||       \
+        defined(__WINNT) ||     \
+        defined(__WINNT__) ||   \
+        defined(__WINNT) ||     \
+        defined(__WIN64) ||     \
+        defined(_WIN64) ||      \
+        defined(WIN64)
+
+#   define OS_IS_WIN            1
+
+#elif   defined(__linux) || defined(__linux__)
+
+#   define OS_IS_UNIX           1
+#   define OS_IS_UNIX_LINUX     1
+
+#elif   defined(__APPLE__)
+
+#   define OS_IS_UNIX           1
+#   define OS_IS_UNIX_BSD       1
+#   define OS_IS_UNIX_MACOS     1
+
+#endif
+
 struct Match {
     string s1;
     string s2;
@@ -270,7 +297,13 @@ void macro_container_to_json(MacroContainer container, string* result) {
         length += (int)strlen(container.values[i]) + (int)strlen(container.keys[i]) + 5;
     }
 
+#if OS_IS_UNIX_MACOS
     char json[length];
+#else
+    if (length == 0) return NULL;
+    char json[length] = malloc(sizeof(char) * length);
+#endif
+
     strcpy(json, "{");
 
     for (int i = 0; i < container.length; i++) {
