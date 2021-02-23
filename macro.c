@@ -297,7 +297,7 @@ void macro_container_to_json(MacroContainer container, string* result) {
         length += (int)strlen(container.values[i]) + (int)strlen(container.keys[i]) + 5;
     }
 
-#if OS_IS_UNIX_MACOS
+#if OS_IS_UNIX
     char json[length];
 #else
     char* json = malloc(sizeof(char) * length);
