@@ -1,5 +1,5 @@
 #include <Python.h>
-#include "../../../macro.c"
+#include "../../../src/macro.c"
 
 /* Pattern Type
 */

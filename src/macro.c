@@ -7,7 +7,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 #if     defined(_MSC_VER) ||    \
         defined(__WIN32) ||     \
@@ -68,7 +67,6 @@ void macro_container_push(MacroContainer *container, string key, string value) {
     container->values[container->length] = value;
     container->length++;
 }
-
 
 // Cmacro string split algorithm
 struct Split string_split(string s, string d, bool one_match) {
