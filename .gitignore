@@ -1,5 +1,7 @@
 cmake-build-debug
 CMakeCache.txt
+Makefile
+!bindings/python/Makefile
 cmake_install.cmake
 CMakeFiles/
 .idea/

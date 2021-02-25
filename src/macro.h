@@ -33,6 +33,8 @@ typedef struct {
 
 MacroContainer macro_container();
 
+void macro_container_clean(MacroContainer* container);
+
 MacroPattern macro_compile(const string pattern);
 
 int macro_parse(MacroPattern compiled_pattern, const string real_const, MacroContainer *container);

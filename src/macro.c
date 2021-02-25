@@ -60,6 +60,12 @@ MacroContainer macro_container() {
     return c;
 }
 
+void macro_container_clean(MacroContainer* container) {
+    container->length = 0;
+    container->values = realloc(container->values, 0);
+    container->keys = realloc(container->keys, 0);
+}
+
 void macro_container_push(MacroContainer *container, string key, string value) {
     container->keys = realloc(container->keys, sizeof(string) * (container->length + 1));
     container->values = realloc(container->values, sizeof(string) * (container->length + 1));
@@ -202,13 +208,14 @@ MacroPattern macro_compile(const string pattern) {
                 type = ANYTHING;
                 d = "";
             } else if (name[0] == '^') {
-                string wo_symbol = string_slice(name, 1, strlen(name)-1);
+                // TODO: update one char decl syntax
+                string wo_symbol = string_slice(name, 1, (int)strlen(name)-1);
                 struct Match m = match_split(wo_symbol, "=");
                 strcpy(name, m.s1);
                 type = CHAR;
                 d = m.s2;
             } else d = "";
-            // TODO: Union(*), Char(^), Recursion(&), Validated(*:validator[args])
+            // TODO: Union(*), Char(^), Recursion(&), Validated(*:validator[args]), Flag(*|flag[args])
 
             // Add argument to data
             data = realloc(data, sizeof(struct Arg) * (length + 1));
@@ -278,6 +285,8 @@ int macro_parse(const MacroPattern compiled_pattern, const string real_const, Ma
             if (arg.after == false) {
                 value = m.s2;
             } else {
+                if (strlen(arg.after_ctx) >= strlen(real)) return 0;
+                // TODO string slice may be unsafe
                 value = string_slice(real, 0, (int)(strlen(real) - strlen(arg.after_ctx) + 1));
             }
             if (parse_argument(container, arg, value) == 0) return 0;
