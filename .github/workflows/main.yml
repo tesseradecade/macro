@@ -26,14 +26,14 @@ jobs:
       # C CHECKS
 
       - name: Install Libcheck on ${{ matrix.os }}
-        if: ${{ matrix.os }} != "windows-latest" # FIXME
+        if: matrix.os != 'windows-latest' # FIXME
         env:
           OS: ${{ matrix.os }}
         run: |
           bash cmake/install_libcheck.sh
 
       - name: Build macro and run tests
-        if: ${{ matrix.os }} != "windows-latest"
+        if: matrix.os != 'windows-latest'
         run: |
           cmake -DMACRO_BUILD_TESTS=ON .
           make

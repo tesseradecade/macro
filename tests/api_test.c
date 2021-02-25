@@ -13,7 +13,7 @@ START_TEST (test_ord_arg_cmp) {
         ck_assert_int_eq(pattern.data[i].after, 0);
     }
     ck_assert_int_eq(i, 1);
-}
+} END_TEST
 
 START_TEST (test_f2_arg_cmp) {
     MacroPattern pattern = macro_compile("Informative <!> <1>!");
@@ -27,12 +27,12 @@ START_TEST (test_f2_arg_cmp) {
         else break;
     }
     ck_assert_int_eq(i, 2);
-}
+} END_TEST
 
 START_TEST (test_container_create) {
     MacroContainer c = macro_container();
     ck_assert_int_eq(c.length, 0);
-}
+} END_TEST
 
 START_TEST (test_ord_arg) {
     MacroPattern pattern = macro_compile("Test pattern <ord>");
@@ -47,7 +47,7 @@ START_TEST (test_ord_arg) {
     ck_assert_int_eq(result_ok, 1);
 
     ck_assert_str_eq(c.values[0], "is ok");
-}
+} END_TEST
 
 START_TEST (test_ord_arg_2) {
     MacroPattern pattern = macro_compile("Test <ord> pattern 2");
@@ -66,7 +66,7 @@ START_TEST (test_ord_arg_2) {
     ck_assert_int_eq(result_ok, 1);
 
     ck_assert_str_eq(c.values[0], "Test pattern");
-}
+} END_TEST
 
 
 START_TEST (test_ord_arg_3) {
@@ -88,7 +88,7 @@ START_TEST (test_ord_arg_3) {
 
     ck_assert_str_eq(c.values[0], "it");
     ck_assert_str_eq(c.values[1], "it is fine but i want that");
-}
+} END_TEST
 
 START_TEST (test_json_cmp) {
     MacroPattern pattern = macro_compile("<ord1>, <ord2>");
@@ -97,7 +97,7 @@ START_TEST (test_json_cmp) {
     char* json = malloc(128);
     macro_container_to_json(c, &json);
     ck_assert_str_eq(json, "{\"ord1\":\"apple\",\"ord2\":\"cucumber\"}");
-}
+} END_TEST
 
 
 Suite * macro_suite(void)
