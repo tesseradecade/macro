@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Check library needed for macro testing
 # https://libcheck.github.io/check/web/install.html
 
@@ -12,4 +14,5 @@ elif [[ "$OS" == *"macos"* ]]; then
   fi
 else
   echo "Instruction for $OS not found"
+  exit 1
 fi
