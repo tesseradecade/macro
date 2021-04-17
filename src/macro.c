@@ -270,7 +270,11 @@ int macro_parse(const MacroPattern compiled_pattern, const string real_const, Ma
 
         if ((int)strlen(m.s1) == 0 && strlen(m.s2) == 0) return 0;
 
-        if (i == 0) {}
+        if (i == 0) {
+            if (strcmp(m.s1, "") != 0) {
+                return 0;
+            }
+        }
         else {
             struct Arg last_arg = compiled_pattern.data[i-1];
             if (parse_argument(container, last_arg, m.s1) == 0) return 0;
