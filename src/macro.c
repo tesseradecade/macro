@@ -207,15 +207,7 @@ MacroPattern macro_compile(const string pattern) {
                 // its existence is required
                 type = ANYTHING;
                 d = "";
-            } else if (name[0] == '^') {
-                // TODO: update one char decl syntax
-                string wo_symbol = string_slice(name, 1, (int)strlen(name)-1);
-                struct Match m = match_split(wo_symbol, "=");
-                strcpy(name, m.s1);
-                type = CHAR;
-                d = m.s2;
-            } else d = "";
-            // TODO: Union(*), Char(^), Recursion(&), Validated(*:validator[args]), Flag(*|flag[args])
+            }  else d = "";
 
             // Add argument to data
             data = realloc(data, sizeof(struct Arg) * (length + 1));
@@ -240,13 +232,6 @@ int parse_argument(MacroContainer* container, const struct Arg argument, string 
             break;
         case ANYTHING:
             if (strlen(value) == 0) return 0;
-        case CHAR:
-            if (strlen(value) != 1) return 0;
-            for (int i = 0; i < (int)strlen(argument.data); i++) if (value[0] == argument.data[i]) {
-                macro_container_push(container, argument.name, value);
-                return 1;
-            }
-            return 0;
         default:
             break;
     }

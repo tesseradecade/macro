@@ -7,7 +7,6 @@ enum ArgType {
     ORDINARY,
     IGNORE,
     ANYTHING,
-    CHAR,
 };
 
 struct Arg {
