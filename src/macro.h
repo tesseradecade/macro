@@ -40,4 +40,8 @@ int macro_parse(MacroPattern compiled_pattern, const string real_const, MacroCon
 
 void macro_container_to_json(MacroContainer container, string* result);
 
+void macro_container_free(MacroContainer *container);
+
+void macro_pattern_free(MacroPattern *pattern);
+
 #endif //MACRO_MACRO_H

@@ -247,6 +247,7 @@ int macro_parse(const MacroPattern compiled_pattern, const string real_const, Ma
         int result = 0;
         if (strcmp(real, compiled_pattern.pattern) == 0) result = 1;
         return result;
+
     } else if (strlen(real) == 0) return 0;
 
     for (int i = 0; compiled_pattern.length; i++) {
@@ -260,6 +261,7 @@ int macro_parse(const MacroPattern compiled_pattern, const string real_const, Ma
                 return 0;
             }
         }
+
         else {
             struct Arg last_arg = compiled_pattern.data[i-1];
             if (parse_argument(container, last_arg, m.s1) == 0) return 0;
@@ -281,16 +283,68 @@ int macro_parse(const MacroPattern compiled_pattern, const string real_const, Ma
             if (parse_argument(container, arg, value) == 0) return 0;
             break;
         }
+
+        free(m.s1);
+        free(m.s2);
     }
 
+    free(real);
     return 1;
+}
+
+char *str_replace(char *orig, char *rep, char *with) {
+    // author: https://stackoverflow.com/a/779960
+    char *result;
+    char *ins;
+    char *tmp;
+    int len_rep;
+    int len_with;
+    int len_front;
+    int count;
+
+    if (!orig || !rep)
+        return NULL;
+
+    len_rep = strlen(rep);
+    if (len_rep == 0)
+        return NULL;
+
+    if (!with)
+        with = "";
+
+    len_with = strlen(with);
+
+    ins = orig;
+    for (count = 0; tmp = strstr(ins, rep); ++count) {
+        ins = tmp + len_rep;
+    }
+
+    tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+
+    if (!result)
+        return NULL;
+
+    while (count--) {
+        ins = strstr(orig, rep);
+        len_front = ins - orig;
+        tmp = strncpy(tmp, orig, len_front) + len_front;
+        tmp = strcpy(tmp, with) + len_with;
+        orig += len_front + len_rep;
+    }
+
+    strcpy(tmp, orig);
+    return result;
 }
 
 void macro_container_to_json(MacroContainer container, string* result) {
     int length = 2;
 
     for (int i = 0; i < container.length; i++) {
-        length += (int)strlen(container.values[i]) + (int)strlen(container.keys[i]) + 5;
+        int esc_count = 0;
+        for (int j = 0; j < strlen(container.values[i]); j++)
+            if (container.values[i][j] == '\"')
+                esc_count++;
+        length += (int)strlen(container.values[i]) + (int)strlen(container.keys[i]) + esc_count + 5;
     }
 
 #if OS_IS_UNIX
@@ -307,7 +361,7 @@ void macro_container_to_json(MacroContainer container, string* result) {
         strcat(json, "\"");
         strcat(json, container.keys[i]);
         strcat(json, "\":\"");
-        strcat(json, container.values[i]);
+        strcat(json, str_replace(container.values[i], "\"", "\\\""));
         strcat(json, "\"");
         if (i != container.length - 1)
             strcat(json, ",");
@@ -315,4 +369,15 @@ void macro_container_to_json(MacroContainer container, string* result) {
 
     strcat(json, "}");
     if (result != NULL) strcpy(*result, json);
+}
+
+void macro_container_free(MacroContainer *container) {
+    for (int i = 0; i < container->length; i++) {
+        free(container->keys[i]);
+        free(container->values[i]);
+    }
+}
+
+void macro_pattern_free(MacroPattern *pattern) {
+    free(pattern->data);
 }

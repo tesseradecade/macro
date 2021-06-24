@@ -19,7 +19,7 @@ def time_regex(repeat: int) -> List[float]:
 
 def time_macro(repeat: int) -> List[float]:
     return timeit.repeat(
-        "pattern.check('a o! b, 123abc')",
+        "pattern.check('a o! b, 123abc', as_json=False)",
         "from macro import Pattern; pattern = Pattern('a <a>! b, <b>')",
         number=repeat
     )

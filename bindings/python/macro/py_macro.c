@@ -29,7 +29,7 @@ PyMP* make_py_macro_pattern(MacroPattern macro_pattern) {
 }
 
 
-static PyObject* cmacro_match(PyObject *Py_UNUSED(self), PyObject *args) {
+PyObject* cmacro_match(PyObject* _, PyObject *args) {
     const char* s_pattern;
     const char* s_real;
     int to_json;
@@ -60,7 +60,7 @@ static PyObject* cmacro_match(PyObject *Py_UNUSED(self), PyObject *args) {
     }
 }
 
-static PyObject* cmacro_pattern(PyObject *Py_UNUSED(self), PyObject *args) {
+PyObject* cmacro_pattern(PyObject* _, PyObject *args) {
     const char* pattern;
     if (!PyArg_ParseTuple(args, "s", &pattern)) {
         PyErr_SetString(PyExc_TypeError, "(pattern: str) must be passed");
@@ -71,7 +71,7 @@ static PyObject* cmacro_pattern(PyObject *Py_UNUSED(self), PyObject *args) {
     return (PyObject*)t_pattern;
 }
 
-static PyObject* cmacro_parse(PyObject *Py_UNUSED(self), PyObject *args) {
+PyObject* cmacro_parse(PyObject* _, PyObject *args) {
     const char *real;
     PyMP *py_mp;
     int to_json;

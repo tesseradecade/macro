@@ -3,6 +3,7 @@
 Parser based on C
 
 ```c
+#include <stdio.h>
 #include "macro.h"
 
 int main() {
@@ -17,6 +18,8 @@ int main() {
         printf("%s\n", json);
     }
     // STDOUT: {"name":"macro","action":"parse"}
+    macro_container_free(&container);
+    macro_pattern_free(&pattern);
 }
 ```
 
@@ -25,7 +28,7 @@ int main() {
 ## Bindings
 
 Currently available: [Python binding](/bindings/python)  
-Planned: Prolog, Rust bindings
+Planned: other bindings
 
 ## Benchmarks
 
