@@ -15,7 +15,7 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-          - windows-latest
+          # - windows-latest
         python-version:
           - 3.7
           - 3.8
@@ -26,7 +26,6 @@ jobs:
       # C CHECKS
 
       - name: Install Libcheck on ${{ matrix.os }}
-        if: matrix.os != 'windows-latest' # FIXME
         env:
           OS: ${{ matrix.os }}
         run: |
